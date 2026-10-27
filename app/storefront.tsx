@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Search, ShoppingBag, UserRound, ArrowUpRight, ArrowRight, X, Minus, Plus, Menu, Scissors, ShieldCheck, Truck, Sparkles, ChevronDown } from 'lucide-react';
 import { demoProducts, money, type Product } from '@/lib/catalog';
 
-export default function Storefront() {
+export default function Storefront({ isAdmin = false }: { isAdmin?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [demo, setDemo] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -50,6 +50,7 @@ export default function Storefront() {
     <div className="product-info"><p className="eyebrow">MARQUIORI SELECTION</p><button className="product-name" onClick={() => setSelected(product)}>{product.name}</button><p className="product-description">{product.description.split('.')[0]}</p><div className="product-bottom"><div><strong>{money(product.price)}</strong><small>Preço {demo ? 'ilustrativo' : 'do catálogo'}</small></div><button className="add-button" disabled={!product.stock} aria-label={`Adicionar ${product.name}`} onClick={() => { changeCart(product, 1); setMessage(product.stock > (cart[product.id] || 0) ? 'Produto adicionado à sacola.' : 'Quantidade máxima disponível.'); }}><Plus size={21} /></button></div></div>
   </article>; }
   return <>
+    {isAdmin && <div className="admin-shortcut"><span>Você está na área do administrador</span><a href="/admin">Editar produtos</a><a href="/admin/ajuda">Ajuda</a></div>}
     <div className="announcement"><span>ESTILO É O QUE VOCÊ DEIXA DE MARCA.</span><span>CONHEÇA O UNIVERSO MARQUIORI <ArrowUpRight size={13} /></span></div>
     <header><div className="header-inner"><a href="/" className="logo-link" aria-label="Marquiori início"><img src="/assets/logo.png" alt="Marquiori Barber Club" /></a><form className="search" onSubmit={event => { event.preventDefault(); filter('Todos'); }}><input aria-label="Buscar produtos" placeholder="O que você procura hoje?" value={search} onChange={event => setSearch(event.target.value)} /><button aria-label="Buscar"><Search size={20} /></button></form><a className="header-service" href="#club"><Scissors size={23} /><span>Feito para o seu<br /><b>ritual de cuidado</b></span></a><a className="account-link" href="/conta"><UserRound size={22} /><span>Minha conta</span></a><button className="cart-button" onClick={() => setCartOpen(true)} aria-label={`Abrir sacola com ${cartCount} itens`}><ShoppingBag size={24} /><span>{cartCount}</span></button><button className="mobile-menu" onClick={() => setMenu(!menu)} aria-label="Abrir categorias"><Menu /></button></div><nav className={menu ? 'nav open' : 'nav'}><button onClick={() => filter('Todos')}><Menu size={16} /> Todos os produtos</button>{['Cabelo', 'Barba', 'Kits', 'Corpo'].map(item => <button key={item} onClick={() => filter(item)}>{item}<ChevronDown size={12} /></button>)}<a href="#club">O Barber Club <ArrowUpRight size={15} /></a></nav></header>
     <main>
