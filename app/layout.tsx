@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./felcor.css";
+import "./checkout.css";
 
 export const metadata: Metadata = {
   title: "Felcor Grooming | Modele o visual. Marque presença.",
