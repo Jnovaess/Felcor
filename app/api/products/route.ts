@@ -7,8 +7,8 @@ import { validImageUrl } from '@/lib/images';
 export const dynamic = 'force-dynamic';
 const productSchema = z.object({
   id: z.string().min(1).max(80), name: z.string().trim().min(2).max(120),
-  category: z.enum(['Cabelo', 'Barba', 'Kits', 'Corpo']), description: z.string().trim().min(3).max(1500),
-  price: z.number().int().min(1).max(10000000), stock: z.number().int().min(0).max(100000),
+  category: z.enum(['Pomadas', 'Toque úmido', 'Cabelo', 'Barba', 'Kits', 'Corpo']), description: z.string().trim().min(3).max(1500),
+  price: z.number().int().min(0).max(10000000), stock: z.number().int().min(0).max(100000),
   image: z.string().max(2000).refine(validImageUrl), active: z.boolean(),
 });
 export async function GET(request: Request) {

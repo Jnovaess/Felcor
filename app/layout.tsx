@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./felcor.css";
 
 export const metadata: Metadata = {
-  title: "Marquiori Barber Club | Seu estilo. Sua assinatura.",
-  description: "Cabelo, barba e cuidados pessoais na Marquiori Barber Club.",
+  title: "Felcor Grooming | Modele o visual. Marque presença.",
+  description: "Pastas modeladoras para cabelo Felcor Grooming. Modele o visual. Marque presença.",
   icons: {
-    icon: "/assets/logo.png",
-    shortcut: "/assets/logo.png",
+    icon: "/assets/felcor-logo.jpg",
+    shortcut: "/assets/felcor-logo.jpg",
   },
 };
 
