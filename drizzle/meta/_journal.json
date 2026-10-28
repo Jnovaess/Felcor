@@ -8,6 +8,13 @@
       "when": 1793135585634,
       "tag": "0000_strange_saracen",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1793180175189,
+      "tag": "0001_admin_sessions",
+      "breakpoints": true
     }
   ]
 }

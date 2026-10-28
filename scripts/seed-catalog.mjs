@@ -1,0 +1,10 @@
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
+import ts from 'typescript';
+const source = await readFile(new URL('../lib/catalog.ts',import.meta.url),'utf8');
+const js = ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.ESNext}}).outputText;
+const { demoProducts } = await import('data:text/javascript;base64,'+Buffer.from(js).toString('base64'));
+const quote = value => typeof value === 'number' ? String(value) : typeof value === 'boolean' ? (value?'1':'0') : "'"+value.replaceAll("'","''")+"'";
+const sql = demoProducts.map(product => `INSERT INTO products (id,name,category,description,price,stock,image,active) VALUES (${['id','name','category','description','price','stock','image','active'].map(key=>quote(product[key])).join(',')}) ON CONFLICT(id) DO NOTHING;`).join('\n');
+await mkdir('outputs',{recursive:true});
+await writeFile('outputs/catalog.sql',sql+'\n');
+console.log('Preparado outputs/catalog.sql. Nenhum banco alterado. Registros existentes serão preservados.');

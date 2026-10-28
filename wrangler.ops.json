@@ -1,0 +1,6 @@
+{
+  "name": "felcor",
+  "compatibility_date": "2026-05-15",
+  "d1_databases": [{"binding":"DB","database_name":"site-creator-d1","database_id":"6c504523-891d-41e5-8a81-6590932cd87e","migrations_dir":"drizzle"}],
+  "r2_buckets": [{"binding":"BUCKET","bucket_name":"site-creator-r2"}]
+}

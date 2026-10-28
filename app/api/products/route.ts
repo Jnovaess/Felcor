@@ -14,9 +14,18 @@ const productSchema = z.object({
 export async function GET(request: Request) {
   const all = new URL(request.url).searchParams.get('all') === '1';
   if (all && !(await adminAllowed())) return Response.json({ error: 'Acesso restrito ao administrador.' }, { status: 403 });
+  try {
   const data = all ? await getDb().select().from(products) : await getDb().select().from(products).where(eq(products.active, true));
   const [total] = await getDb().select({ value: count() }).from(products);
   return Response.json(data, { headers: { 'Cache-Control': 'no-store', 'X-Catalog-Initialized': total.value > 0 ? '1' : '0' } });
+  } catch { return Response.json({ error: 'Catálogo temporariamente indisponível. Tente novamente em instantes.' }, { status: 503 }); }
+}
+export async function DELETE(request: Request) {
+  if (!sameOrigin(request) || !(await adminAllowed())) return Response.json({error:'Acesso não autorizado.'},{status:403});
+  const parsed = z.object({id:z.string().min(1).max(80)}).safeParse(await request.json().catch(()=>null));
+  if (!parsed.success) return Response.json({error:'Produto inválido.'},{status:400});
+  await getDb().delete(products).where(eq(products.id,parsed.data.id));
+  return Response.json({ok:true});
 }
 export async function POST(request: Request) {
   if (!sameOrigin(request) || !(await adminAllowed())) return Response.json({ error: 'Acesso não autorizado.' }, { status: 403 });

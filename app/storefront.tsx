@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Search, ShoppingBag, UserRound, ArrowUpRight, ArrowRight, X, Minus, Plus, Menu, WandSparkles, ShieldCheck, Truck, Sparkles, ChevronDown } from 'lucide-react';
-import { demoProducts, galleries, money, priceLabel, type Product } from '@/lib/catalog';
+import { galleries, money, priceLabel, type Product } from '@/lib/catalog';
 
 export default function Storefront({ isAdmin = false, whatsappReady = false }: { isAdmin?: boolean; whatsappReady?: boolean }) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,8 +25,7 @@ export default function Storefront({ isAdmin = false, whatsappReady = false }: {
     fetch('/api/products').then(async response => {
       if (!response.ok) throw new Error('Não foi possível carregar o catálogo. Recarregue a página.');
       const data: Product[] = await response.json();
-      const emptyDatabase = response.headers.get('X-Catalog-Initialized') === '0';
-      setProducts(emptyDatabase ? demoProducts : data); setDemo(emptyDatabase);
+      setProducts(data); setDemo(false);
     }).catch(reason => setError(reason.message)).finally(() => setLoading(false));
     try { const saved = JSON.parse(localStorage.getItem('felcor-cart') || '{}'); if (saved && typeof saved === 'object') setCart(Object.fromEntries(Object.entries(saved).filter((entry): entry is [string, number] => typeof entry[1] === 'number' && Number.isInteger(entry[1]) && entry[1] > 0 && entry[1] <= 100))); } catch {}
   }, []);

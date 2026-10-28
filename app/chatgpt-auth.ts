@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { env } from 'cloudflare:workers';
+import { sessionAdmin } from '@/lib/admin-session';
 
 export type ChatGPTUser = {
   userId: string;
@@ -19,6 +21,11 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
+  const admin = await sessionAdmin();
+  if (admin) return { userId: `admin:${admin.email}`, email: admin.email, displayName: 'Administrador', fullName: null };
+  // Only a deployment behind the trusted Sites identity proxy may trust these headers.
+  // A direct workers.dev deployment must never enable this switch.
+  if ((env as unknown as { TRUST_SITES_IDENTITY?: string }).TRUST_SITES_IDENTITY !== 'true') return null;
   const requestHeaders = await headers();
   const userId = requestHeaders.get(USER_ID_HEADER);
   const email = requestHeaders.get(USER_EMAIL_HEADER);

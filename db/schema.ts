@@ -1,4 +1,11 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+export const adminSessions = sqliteTable('admin_sessions', {
+  tokenHash: text('token_hash').primaryKey(), email: text('email').notNull(),
+  credentialVersion: text('credential_version').notNull(), expiresAt: integer('expires_at').notNull(),
+}, table => [index('admin_sessions_expiry').on(table.expiresAt)]);
+export const loginAttempts = sqliteTable('login_attempts', {
+  key: text('key').primaryKey(), attempts: integer('attempts').notNull(), expiresAt: integer('expires_at').notNull(),
+}, table => [index('login_attempts_expiry').on(table.expiresAt)]);
 export const products = sqliteTable('products', {
   id: text('id').primaryKey(), name: text('name').notNull(), category: text('category').notNull(),
   description: text('description').notNull(), price: integer('price').notNull(),
