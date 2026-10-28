@@ -1,0 +1,2 @@
+'use client';
+export default function Signout(){return <button className="text-link" onClick={async()=>{const response=await fetch('/api/account',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'logout'})});if(response.ok){await fetch('/api/auth/logout',{method:'POST'});window.location.assign('/conta');}else window.alert('Não foi possível sair. Tente novamente.');}}>SAIR DA CONTA</button>;}

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { env } from 'cloudflare:workers';
 import { sessionAdmin } from '@/lib/admin-session';
+import { customerUser } from '@/lib/customer-session';
 
 export type ChatGPTUser = {
   userId: string;
@@ -21,6 +22,8 @@ const SIGN_OUT_PATH = "/signout-with-chatgpt";
 const CALLBACK_PATH = "/callback";
 
 export async function getChatGPTUser(): Promise<ChatGPTUser | null> {
+  const customer = await customerUser();
+  if(customer) return customer;
   const admin = await sessionAdmin();
   if (admin) return { userId: `admin:${admin.email}`, email: admin.email, displayName: 'Administrador', fullName: null };
   // Only a deployment behind the trusted Sites identity proxy may trust these headers.

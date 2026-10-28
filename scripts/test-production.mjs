@@ -17,7 +17,7 @@ const worker=new Miniflare({modules:['index.js',...files].map(file=>({type:'ESMo
   bindings:{...config.vars,ADMIN_PASSWORD_HASH:hash},d1Databases:['DB'],r2Buckets:['BUCKET'],
   assets:{directory:'dist/client',binding:'ASSETS',routerConfig:{has_user_worker:true,invoke_user_worker_ahead_of_assets:true}}});
 const db=await worker.getD1Database('DB');
-for(const file of ['drizzle/0000_strange_saracen.sql','drizzle/0001_admin_sessions.sql']){
+for(const file of ['drizzle/0000_strange_saracen.sql','drizzle/0001_admin_sessions.sql','drizzle/0002_customer_accounts.sql']){
   const sql=await readFile(file,'utf8');
   for(const statement of sql.split(';').map(s=>s.replaceAll('--> statement-breakpoint','').trim()).filter(Boolean)) await db.prepare(statement).run();
 }
@@ -82,6 +82,26 @@ try {
   cookie='';
   assert.equal((await request('/api/products',{method:'POST',data:product})).status,403);
   assert.equal((await request('/api/images',{method:'POST',data:multipart,headers:{'Content-Type':`multipart/form-data; boundary=${boundary}`}})).status,403);
+  const customerPassword=randomBytes(20).toString('hex');
+  const account=async(action,extra={})=>request('/api/account',{method:'POST',data:{action,...extra}});
+  assert.equal((await account('register',{email:'customer@example.com',password:customerPassword,name:'Cliente Teste',consent:true})).status,200);
+  assert.equal((await account('login',{email:'customer@example.com',password:'wrongpassword1234'})).status,401);
+  const customerLogin=await account('login',{email:'customer@example.com',password:customerPassword});
+  assert.equal(customerLogin.status,200,customerLogin.text);
+  cookie=customerLogin.headers['set-cookie'][0].split(';')[0];
+  assert.equal((await request('/api/products?all=1')).status,403);
+  assert.equal((await request('/api/profile',{method:'POST',data:{name:'Cliente Teste',phone:'11999999999'}})).status,200);
+  assert.equal(JSON.parse((await request('/api/profile')).text).email,'customer@example.com');
+  const firstCookie=cookie;
+  assert.equal((await account('logout')).status,200);
+  assert.equal((await request('/api/profile',{headers:{Cookie:firstCookie}})).status,401);
+  cookie='';
+  assert.equal((await account('register',{email:'second@example.com',password:customerPassword,name:'Segundo Cliente',consent:true})).status,200);
+  const second=await account('login',{email:'second@example.com',password:customerPassword});
+  cookie=second.headers['set-cookie'][0].split(';')[0];
+  const secondProfile=JSON.parse((await request('/api/profile')).text);
+  assert.equal(secondProfile.email,'second@example.com');assert.equal(secondProfile.phone,'');
+  await account('logout');cookie='';
   let limited=false;
   for(let i=0;i<12;i++) {const result=await request('/api/auth/login',{method:'POST',data:{email:'joaonovaesq4@gmail.com',password:'incorrect'}});if(result.status===429){limited=true;break;}}
   assert(limited,'Login rate limit');
