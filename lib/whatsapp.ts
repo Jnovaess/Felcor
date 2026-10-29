@@ -1,3 +1,4 @@
+
 import { money } from './catalog';
 
 export function whatsappNumber(value?: string) {
@@ -5,16 +6,36 @@ export function whatsappNumber(value?: string) {
   return /^[1-9]\d{9,14}$/.test(digits) ? digits : null;
 }
 
-export function orderLink(phone: string, items: { name: string; price: number; quantity: number }[]) {
-  const subtotal = items.reduce((total, item) => total + item.price * item.quantity, 0);
+export function orderLink(
+  phone: string,
+  items: { name: string; price: number; quantity: number }[]
+) {
+  const subtotal = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0
+  );
+
   const message = [
-    'Olá! Gostaria de combinar o pagamento deste pedido da Felcor Grooming:',
+    '*Solicitação de Pedido*',
     '',
-    ...items.map(item => `${item.quantity} × ${item.name} — ${money(item.price)} cada — ${money(item.price * item.quantity)}`),
+    'Olá! Gostaria de finalizar meu pedido com a Felcor Grooming.',
     '',
-    `Subtotal dos produtos: ${money(subtotal)}`,
-    'Frete não incluído. Por favor, confirme disponibilidade, entrega e forma de pagamento.',
-    'Esta mensagem é uma solicitação de compra, sem pagamento ou reserva de estoque realizados.',
+    '*Resumo do pedido:*',
+    ...items.map(
+      item =>
+        `* ${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
+    ),
+    '',
+    `*Subtotal:* ${money(subtotal)}`,
+    '*Frete:* A calcular',
+    '',
+    'Gostaria de confirmar a disponibilidade dos produtos, as opções de entrega e as formas de pagamento.',
+    '',
+    'Aguardo as informações para concluir minha compra. Obrigado!',
+    '',
+    '_Este pedido está sujeito à confirmação de disponibilidade e pagamento._',
   ].join('\n');
+
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 }
+
