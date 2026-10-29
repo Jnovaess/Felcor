@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Pause, Play, ArrowUpRight } from 'lucide-react';
-import { wholesaleLink } from '@/lib/contact';
+import { wholesaleLink, INSTAGRAM_URL } from '@/lib/contact';
 import { track } from '@/lib/track';
 
 export default function AnnouncementTicker() {
@@ -15,6 +15,9 @@ export default function AnnouncementTicker() {
             <strong>SEJA REVENDEDOR FELCOR</strong> · Pedido mínimo de 10 unidades <ArrowUpRight size={16} aria-hidden="true" />
           </a>
           <span>EFEITO SECO OU MOLHADO · Encontre o seu estilo</span>
+          <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" tabIndex={copy === 1 ? -1 : undefined}>
+            <img src="/assets/instagram.svg" width={17} height={17} alt="" /> SIGA @felcorgrooming NO INSTAGRAM <ArrowUpRight size={16} aria-hidden="true" />
+          </a>
           <span>KIT FELCOR DUO · Dois estilos, infinitas possibilidades</span>
           <span>PAGAMENTO E ENTREGA · Combine pelo WhatsApp</span>
         </div>)}

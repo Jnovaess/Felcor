@@ -10,6 +10,7 @@
 .ticker-group{display:flex;align-items:center;gap:40px;padding:12px 40px 12px 0;flex-shrink:0}
 .ticker-group>a,.ticker-group>span{display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
 .ticker-group>a:hover{text-decoration:underline}
+.ticker-group img{filter:brightness(0);flex-shrink:0}
 .ticker-group>span:before{content:'✦';margin-right:25px;font-size:12px}
 .ticker-toggle{display:flex;align-items:center;justify-content:center;flex-shrink:0;width:48px;border-left:1px solid #1113}
 .store-ticker a:focus-visible,.ticker-toggle:focus-visible{outline:2px solid #111;outline-offset:-3px}
