@@ -1,3 +1,4 @@
 export default function ProductPhoto({id,src,alt}:{id:string;src:string;alt:string}) {
- return id==='felcor-kit-duo' && src==='/assets/duo-reference.png' ? <div className="duo-photo"><img src={src} alt={alt}/></div> : <img src={src} alt={alt} loading="lazy"/>;
+ const image = id==='felcor-kit-duo' && src==='/assets/duo-reference.png' ? '/assets/felcor-duo-studio.png' : src;
+ return <img className={id==='felcor-kit-duo'?'kit-packshot':undefined} src={image} alt={alt} loading="lazy"/>;
 }
