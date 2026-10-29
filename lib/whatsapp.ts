@@ -16,18 +16,18 @@ export function orderLink(
   );
 
   const message = [
-    '*Solicitação de Pedido*',
+    'Solicitação de Pedido',
     '',
     'Olá! Gostaria de finalizar meu pedido com a Felcor Grooming.',
     '',
-    '*Resumo do pedido:*',
+    'Resumo do pedido: ',
     ...items.map(
       item =>
         `* ${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
     ),
     '',
-    `*Subtotal:* ${money(subtotal)}`,
-    '*Frete:* A calcular',
+    `Subtotal:  ${money(subtotal)}`,
+    'Frete: A calcular',
     '',
     'Gostaria de confirmar a disponibilidade dos produtos, as opções de entrega e as formas de pagamento.',
     '',
