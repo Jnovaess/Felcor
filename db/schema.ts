@@ -1,4 +1,7 @@
 import { sqliteTable, text, integer, index } from 'drizzle-orm/sqlite-core';
+export const analyticsEvents=sqliteTable('analytics_events',{
+ id:text('id').primaryKey(),kind:text('kind').notNull(),day:text('day').notNull(),sessionKey:text('session_key').notNull(),createdAt:integer('created_at').notNull(),
+},t=>[index('analytics_events_day').on(t.day)]);
 export const customerAccounts = sqliteTable('customer_accounts', {
  id:text('id').primaryKey(), email:text('email').notNull().unique(), name:text('name').notNull(), passwordHash:text('password_hash').notNull(), createdAt:text('created_at').notNull(),
 });

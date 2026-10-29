@@ -17,10 +17,11 @@ const worker=new Miniflare({modules:['index.js',...files].map(file=>({type:'ESMo
   bindings:{...config.vars,ADMIN_PASSWORD_HASH:hash},d1Databases:['DB'],r2Buckets:['BUCKET'],
   assets:{directory:'dist/client',binding:'ASSETS',routerConfig:{has_user_worker:true,invoke_user_worker_ahead_of_assets:true}}});
 const db=await worker.getD1Database('DB');
-for(const file of ['drizzle/0000_strange_saracen.sql','drizzle/0001_admin_sessions.sql','drizzle/0002_customer_accounts.sql']){
+for(const file of ['drizzle/0000_strange_saracen.sql','drizzle/0001_admin_sessions.sql','drizzle/0002_customer_accounts.sql','drizzle/0003_analytics_events.sql']){
   const sql=await readFile(file,'utf8');
   for(const statement of sql.split(';').map(s=>s.replaceAll('--> statement-breakpoint','').trim()).filter(Boolean)) await db.prepare(statement).run();
 }
+const analyticsSession=crypto.randomUUID();
 const origin = 'https://felcor.test';
 let cookie='';
 let logs='';
@@ -60,7 +61,7 @@ try {
   await request('/api/admin',{method:'POST'});
   products=JSON.parse((await request('/api/products')).text);
   assert.equal(products.find(p=>p.id===product.id).price,4990);
-  const checkout=await request('/api/checkout',{method:'POST',data:{items:[{id:product.id,quantity:2}],price:1}});
+  const checkout=await request('/api/checkout',{method:'POST',data:{session:analyticsSession,items:[{id:product.id,quantity:2}],price:1}});
   assert.equal(checkout.status,200,checkout.text);
   const url=new URL(JSON.parse(checkout.text).url);
   assert.equal(url.origin,'https://wa.me');assert.equal(url.pathname,'/5511939002074');
@@ -76,6 +77,28 @@ try {
   assert.equal((await request('/api/products',{method:'POST',data:{...product,image:imageUrl,active:false}})).status,200);
   assert.equal(JSON.parse((await request('/api/products')).text).length,2);
   assert.equal((await request('/api/products',{method:'DELETE',data:{id:product.id}})).status,200);
+
+  const record=async data=>request('/api/analytics',{method:'POST',headers:{Cookie:''},data});
+  assert.equal((await request('/api/admin/reports',{headers:{Cookie:''}})).status,403);
+  assert.equal((await request('/api/admin/reports?start=2026-02-30&end=2026-03-01')).status,400);
+  assert.equal((await record({kind:'visit',session:analyticsSession})).status,204);
+  await record({kind:'visit',session:analyticsSession});
+  await record({kind:'reseller',session:analyticsSession});
+  await record({kind:'contact',session:analyticsSession});
+  const attempt=JSON.parse(checkout.text).attempt;
+  assert(attempt);
+  await record({kind:'checkout',attempt});
+  await record({kind:'checkout',attempt});
+  await record({kind:'checkout',attempt:crypto.randomUUID()});
+  assert.equal((await request('/api/analytics',{method:'POST',data:{kind:'visit',session:crypto.randomUUID()}})).status,204);
+  const report=JSON.parse((await request('/api/admin/reports')).text);
+  assert.equal(report.days.length,1);
+  assert.equal(report.days[0].visits,1);
+  assert.equal(report.days[0].checkouts,1);
+  assert.equal(report.days[0].resellers,1);
+  assert.equal(report.days[0].contacts,1);
+  assert.equal((await request('/api/analytics',{method:'POST',headers:{Origin:'https://attacker.example'},data:{kind:'visit',session:analyticsSession}})).status,403);
+  console.log('PASS: analytics deduplication, confirmed checkout tokens, admin exclusion, date validation, aggregates and access control.');
   const oldCookie=cookie;
   assert.equal((await request('/api/auth/logout',{method:'POST'})).status,303);
   assert.equal((await request('/api/products?all=1',{headers:{Cookie:oldCookie}})).status,403);

@@ -5,8 +5,9 @@ import { sameOrigin } from '@/lib/access';
 import { orderLink, whatsappNumber } from '@/lib/whatsapp';
 import { catalogAvailability, enoughStock } from '@/lib/availability';
 import { z } from 'zod';
+import { prepareCheckout } from '@/lib/analytics';
 
-const schema = z.object({ items: z.array(z.object({ id: z.string().min(1).max(80), quantity: z.number().int().min(1).max(100) })).min(1).max(20) });
+const schema = z.object({ session:z.string().uuid().optional(), items: z.array(z.object({ id: z.string().min(1).max(80), quantity: z.number().int().min(1).max(100) })).min(1).max(20) });
 export async function POST(request: Request) {
   if (!sameOrigin(request)) return Response.json({ error: 'Requisição não autorizada.' }, { status: 403 });
   const phone = whatsappNumber((env as unknown as { WHATSAPP_NUMBER?: string }).WHATSAPP_NUMBER);
@@ -24,5 +25,6 @@ export async function POST(request: Request) {
     if (!product || !product.active || product.price <= 0 || product.stock < requested.quantity) return Response.json({ error: 'Um produto mudou de disponibilidade ou quantidade. Atualize a página e revise a sacola.' }, { status: 409 });
     items.push({ name: product.name, price: product.price, quantity: requested.quantity });
   }
-  return Response.json({ url: orderLink(phone, items) }, { headers: { 'Cache-Control': 'no-store' } });
+  const attempt=await prepareCheckout(parsed.data.session||crypto.randomUUID());
+  return Response.json({ url: orderLink(phone, items),attempt }, { headers: { 'Cache-Control': 'no-store' } });
 }
