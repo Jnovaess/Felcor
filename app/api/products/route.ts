@@ -3,11 +3,12 @@ import { products } from '@/db/schema';
 import { adminAllowed, sameOrigin } from '@/lib/access';
 import { eq, count } from 'drizzle-orm';
 import { z } from 'zod';
+import { catalogAvailability } from '@/lib/availability';
 import { validImageUrl } from '@/lib/images';
 export const dynamic = 'force-dynamic';
 const productSchema = z.object({
   id: z.string().min(1).max(80), name: z.string().trim().min(2).max(120),
-  category: z.enum(['Pomadas', 'Toque úmido', 'Cabelo', 'Barba', 'Kits', 'Corpo']), description: z.string().trim().min(3).max(1500),
+  category: z.enum(['Pomadas', 'Efeito seco', 'Efeito molhado', 'Toque úmido', 'Cabelo', 'Barba', 'Kits', 'Corpo']), description: z.string().trim().min(3).max(1500),
   price: z.number().int().min(0).max(10000000), stock: z.number().int().min(0).max(100000),
   image: z.string().max(2000).refine(validImageUrl), active: z.boolean(),
 });
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
   try {
   const data = all ? await getDb().select().from(products) : await getDb().select().from(products).where(eq(products.active, true));
   const [total] = await getDb().select({ value: count() }).from(products);
-  return Response.json(data, { headers: { 'Cache-Control': 'no-store', 'X-Catalog-Initialized': total.value > 0 ? '1' : '0' } });
+  return Response.json(all ? data : catalogAvailability(data), { headers: { 'Cache-Control': 'no-store', 'X-Catalog-Initialized': total.value > 0 ? '1' : '0' } });
   } catch { return Response.json({ error: 'Catálogo temporariamente indisponível. Tente novamente em instantes.' }, { status: 503 }); }
 }
 export async function DELETE(request: Request) {

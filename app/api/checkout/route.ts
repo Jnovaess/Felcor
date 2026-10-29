@@ -3,7 +3,7 @@ import { getDb } from '@/db';
 import { products } from '@/db/schema';
 import { sameOrigin } from '@/lib/access';
 import { orderLink, whatsappNumber } from '@/lib/whatsapp';
-import { inArray } from 'drizzle-orm';
+import { catalogAvailability, enoughStock } from '@/lib/availability';
 import { z } from 'zod';
 
 const schema = z.object({ items: z.array(z.object({ id: z.string().min(1).max(80), quantity: z.number().int().min(1).max(100) })).min(1).max(20) });
@@ -15,7 +15,9 @@ export async function POST(request: Request) {
   if (!parsed.success) return Response.json({ error: 'Revise os itens e quantidades da sacola.' }, { status: 400 });
   const ids = parsed.data.items.map(item => item.id);
   if (new Set(ids).size !== ids.length) return Response.json({ error: 'A sacola contém itens repetidos. Atualize a página.' }, { status: 400 });
-  const current = await getDb().select().from(products).where(inArray(products.id, ids));
+  const stored = await getDb().select().from(products);
+  const current = catalogAvailability(stored);
+  if(!enoughStock(stored, parsed.data.items)) return Response.json({error:'Quantidade indisponível. O kit compartilha o estoque das pomadas avulsas.'},{status:409});
   const items = [];
   for (const requested of parsed.data.items) {
     const product = current.find(item => item.id === requested.id);

@@ -52,8 +52,8 @@ try {
   assert.equal((await request('/api/admin',{method:'POST'})).status,200);
   assert.equal((await request('/api/admin',{method:'POST'})).status,200);
   let products=JSON.parse((await request('/api/products')).text);
-  assert.equal(products.length,2);
-  assert(products.every(p=>p.price===0 && p.stock===0));
+  assert.equal(products.length,3);
+  assert(products.every(p=>p.price>0 && p.stock===0));
   const product={...products[0],price:4990,stock:3};
   assert.equal((await request('/api/products',{method:'POST',data:{...product,price:-1}})).status,400);
   assert.equal((await request('/api/products',{method:'POST',data:product})).status,200);
@@ -63,7 +63,7 @@ try {
   const checkout=await request('/api/checkout',{method:'POST',data:{items:[{id:product.id,quantity:2}],price:1}});
   assert.equal(checkout.status,200,checkout.text);
   const url=new URL(JSON.parse(checkout.text).url);
-  assert.equal(url.origin,'https://wa.me');assert.equal(url.pathname,'/5511943777352');
+  assert.equal(url.origin,'https://wa.me');assert.equal(url.pathname,'/5511939002074');
   assert(url.searchParams.get('text').includes('99,80'));
   assert.equal((await request('/api/checkout',{method:'POST',data:{items:[{id:product.id,quantity:4}]}})).status,409);
   const boundary='felcor-test-boundary';
@@ -74,7 +74,7 @@ try {
   const imageUrl=JSON.parse(upload.text).url;
   const image=await request(imageUrl);assert.equal(image.status,200);assert.equal(image.headers['content-type'],'image/jpeg');
   assert.equal((await request('/api/products',{method:'POST',data:{...product,image:imageUrl,active:false}})).status,200);
-  assert.equal(JSON.parse((await request('/api/products')).text).length,1);
+  assert.equal(JSON.parse((await request('/api/products')).text).length,2);
   assert.equal((await request('/api/products',{method:'DELETE',data:{id:product.id}})).status,200);
   const oldCookie=cookie;
   assert.equal((await request('/api/auth/logout',{method:'POST'})).status,303);

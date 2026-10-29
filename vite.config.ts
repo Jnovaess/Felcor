@@ -17,7 +17,7 @@ const managedLinux = readExecutionProfile() === "managed-linux";
 
 const localBindingConfig = {
   name: "felcor",
-  vars: { WHATSAPP_NUMBER: "5511943777352", ADMIN_EMAIL: "joaonovaesq4@gmail.com" },
+  vars: { WHATSAPP_NUMBER: "5511939002074", ADMIN_EMAIL: "joaonovaesq4@gmail.com" },
   main: "./worker/index.ts",
   compatibility_flags: ["nodejs_compat"],
   d1_databases: d1
