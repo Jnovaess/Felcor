@@ -14,3 +14,12 @@ handoffCart('https://wa.me/5511939002074?text=pedido',actions);assert.deepEqual(
 calls.length=0;assert.throws(()=>handoffCart('https://other.example',actions));assert.deepEqual(calls,[]);
 assert.throws(()=>handoffCart('https://wa.me/5511939002074',{...actions,clearStorage:()=>{throw Error('storage unavailable');}}));assert.deepEqual(calls,[]);
 console.log('PASS: duo availability, combined stock, inactive components, cart clearing before navigation and preservation on invalid link/storage failure.');
+const {openCheckoutTab}=await source('lib/checkout-tab.ts');
+assert.throws(()=>openCheckoutTab(()=>null),/bloqueou/);
+let redirected='',closed=false;
+const fake={opener:{},closed:false,close:()=>{closed=true;},location:{replace:url=>{redirected=url;}}};
+const tab=openCheckoutTab(()=>fake);assert.equal(fake.opener,null);
+tab.navigate('https://wa.me/5511939002074');assert.equal(redirected,'https://wa.me/5511939002074');
+fake.closed=true;assert.throws(()=>tab.navigate('https://wa.me/5511939002074'),/fechada/);
+fake.closed=false;tab.cancel();assert(closed);
+console.log('PASS: blocked/closed tabs handled, opener detached and WhatsApp navigation uses only the new tab.');
