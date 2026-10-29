@@ -23,7 +23,7 @@ export function orderLink(
     'Resumo do pedido: ',
     ...items.map(
       item =>
-        `* ${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
+        ` ${item.quantity}x ${item.name} — ${money(item.price * item.quantity)}`
     ),
     '',
     `Subtotal:  ${money(subtotal)}`,
@@ -33,7 +33,7 @@ export function orderLink(
     '',
     'Aguardo as informações para concluir minha compra. Obrigado!',
     '',
-    '_Este pedido está sujeito à confirmação de disponibilidade e pagamento._',
+    'Este pedido está sujeito à confirmação de disponibilidade e pagamento.',
   ].join('\n');
 
   return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
